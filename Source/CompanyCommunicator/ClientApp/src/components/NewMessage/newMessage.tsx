@@ -21,7 +21,7 @@ import { ImageUtil } from '../../utility/imageutility';
 import { TFunction } from "i18next";
 import { Icon, TooltipHost } from 'office-ui-fabric-react';
 
-const validImageTypes = ['image/gif', 'image/jpeg', 'image/png','image/jpg'];
+const validImageTypes = ['image/gif', 'image/jpeg', 'image/png', 'image/jpg'];
 
 
 type dropdownItem = {
@@ -80,6 +80,8 @@ export interface formState {
     selectedGroups: dropdownItem[],
     errorImageUrlMessage: string,
     errorButtonUrlMessage: string,
+    selectedGroupsElement: boolean,
+    selectedAllUsersElement: boolean
 }
 
 export interface INewMessageProps extends RouteComponentProps, WithTranslation {
@@ -104,7 +106,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             author: "",
             btnLink: "",
             imageLink: "",
-            localImagePath:"",
+            localImagePath: "",
             btnTitle: "",
             card: this.card,
             page: "CardCreation",
@@ -127,6 +129,8 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
             selectedGroups: [],
             errorImageUrlMessage: "",
             errorButtonUrlMessage: "",
+            selectedGroupsElement: false,
+            selectedAllUsersElement: false
         }
 
         this.fileInput = React.createRef();
@@ -174,6 +178,49 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                 })
             }
         });
+    }
+
+    public componentDidUpdate(prevProps: Readonly<INewMessageProps>, prevState: Readonly<formState>) {
+        
+        // Set image url tooltip focus
+        const imageUrlElement = document.getElementsByClassName("imgUrlTooltip");
+        for (let i = 0; i < imageUrlElement.length; i++) {
+            imageUrlElement[i].setAttribute("tabindex", "0");
+        }
+        
+        // Set aria-label attribute to 'send to everyone' radio button elements
+        let sendToAllUsersElement = document.getElementById("sendToAllUsersDiv");
+        if (!this.state.selectedAllUsersElement && sendToAllUsersElement) {
+            this.addRadioElementNode(sendToAllUsersElement, this.localize("SendToAllUsersNote"));
+            this.setState({
+                selectedAllUsersElement: true
+            });
+        }
+        // Set aria-label attribute to 'send to groups' radio button elements
+        let sendToGroupElement = document.getElementById("sendToGroupsDiv");
+        if (!this.state.selectedGroupsElement && sendToGroupElement) {
+            if(!this.state.groupAccess)
+            {
+                this.addRadioElementNode(sendToGroupElement, this.localize("SendToGroupsPermissionNote"));
+            }
+            else
+            {
+                this.addRadioElementNode(sendToGroupElement, this.localize("SendToGroupsNote"));
+            }
+            this.setState({
+                selectedGroupsElement: true
+            });
+        }
+}
+
+
+    public addRadioElementNode(radioGroupElement: any, selectedRadioButtonText: string) {
+
+        // Get First child node
+        let firstChildElement = radioGroupElement && radioGroupElement.getElementsByClassName("ui-radiogroup__item")[0];
+        const narratorNoteElement = document.createElement("span");
+        narratorNoteElement.setAttribute("aria-label", selectedRadioButtonText);
+        firstChildElement && firstChildElement.appendChild(narratorNoteElement);
     }
 
     private makeDropdownItems = (items: any[] | undefined) => {
@@ -336,33 +383,33 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     private checkValidSizeOfImage = (resizedImageAsBase64: string) => {
         var stringLength = resizedImageAsBase64.length - 'data:image/png;base64,'.length;
-        var sizeInBytes = 4 * Math.ceil((stringLength / 3))*0.5624896334383812;
-        var sizeInKb = sizeInBytes/1000;
+        var sizeInBytes = 4 * Math.ceil((stringLength / 3)) * 0.5624896334383812;
+        var sizeInKb = sizeInBytes / 1000;
 
-        if(sizeInKb <= 1024)
+        if (sizeInKb <= 1024)
             return true
-        
+
         else
             return false;
     }
-    
+
 
     private handleImageSelection = () => {
         const file = this.fileInput.current.files[0];
-        
-        if(file){
-            const  fileType = file['type'];
+
+        if (file) {
+            const fileType = file['type'];
             const { type: mimeType } = file;
 
             if (!validImageTypes.includes(fileType)) {
-               this.setState({errorImageUrlMessage: this.localize("ErrorImageTypesMessage")});
-               return;
+                this.setState({ errorImageUrlMessage: this.localize("ErrorImageTypesMessage") });
+                return;
             }
-            
-            this.setState({localImagePath: file['name']});
-            this.setState({errorImageUrlMessage: ""});
-    
-    
+
+            this.setState({ localImagePath: file['name'] });
+            this.setState({ errorImageUrlMessage: "" });
+
+
             const fileReader = new FileReader();
             fileReader.readAsDataURL(file);
             fileReader.onload = () => {
@@ -372,7 +419,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
                 image.onload = function (e: any) {
                     const MAX_WIDTH = 1024;
-    
+
                     if (image.width > MAX_WIDTH) {
                         const canvas = document.createElement('canvas');
                         canvas.width = MAX_WIDTH;
@@ -390,20 +437,20 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                     this.setState({ errorImageUrlMessage: this.localize("ErrorImageSizeMessage") });
                     return;
                 }
-                
+
 
                 setCardImageLink(this.card, resizedImageAsBase64);
                 this.updateCard();
                 this.setState({
                     imageLink: resizedImageAsBase64
-                    });
+                });
             }
-    
+
             fileReader.onerror = (error) => {
                 //reject(error);
             }
         }
-        
+
     }
 
     public render(): JSX.Element {
@@ -433,29 +480,30 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                         <Flex gap="gap.small" vAlign="end">
                                             <Input fluid className="inputField imageField"
                                                 value={(this.state.imageLink && this.state.imageLink.startsWith("data:"))
-                                                            ? this.state.localImagePath 
-                                                            : this.state.imageLink}
+                                                    ? this.state.localImagePath
+                                                    : this.state.imageLink}
                                                 label={
                                                     <>
-                                            {this.localize("ImageURL")}
-                                            <TooltipHost 
-                                                content={this.localize("ImageSizeInfoContent")}
-                                                calloutProps={{ gapSpace: 0 }}
-                                                hostClassName="tooltipHostStyles"
-                                                >
-                                                <Icon aria-label="Info" iconName="Info" className='tooltipHostStylesInsideContent'/>
-                                            </TooltipHost>
-                                            </>
-                                            }
+                                                        {this.localize("ImageURL")}
+                                                        <TooltipHost
+                                                            content={this.localize("ImageSizeInfoContent")}
+                                                            calloutProps={{ gapSpace: 0 }}
+                                                            hostClassName="tooltipHostStyles imgUrlTooltip"
+                                                        >
+                                                            <Icon aria-label="Info" iconName="Info" className='tooltipHostStylesInsideContent' />
+                                                        </TooltipHost>
+                                                    </>
+                                                }
                                                 placeholder={this.localize("ImageURL")}
                                                 onChange={this.onImageLinkChanged}
                                                 error={!(this.state.errorImageUrlMessage === "")}
-                                                autoComplete="off"                                             
+                                                autoComplete="off"
                                             />
-                                            
+
                                             <Flex.Item push>
                                                 <Button onClick={this.handleUploadClick}
                                                     size="medium" className="inputField"
+                                                    aria-label={this.localize("UploadImageInfo")}
                                                     content={this.localize("Upload")} iconPosition="before" />
                                             </Flex.Item>
                                             <input type="file" accept=".jpg, .jpeg, .png, .gif"
@@ -552,6 +600,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                                     value={this.state.selectedTeams}
                                                                     onChange={this.onTeamsChange}
                                                                     noResultsMessage={this.localize("NoMatchMessage")}
+                                                                    searchInput={{ autoFocus: true }} 
                                                                 />
                                                             </Flex>
                                                         )
@@ -588,9 +637,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                     label: this.localize("SendToAllUsers"),
                                                     children: (Component, { name, ...props }) => {
                                                         return (
-                                                            <Flex key={name} column>
+                                                            <Flex key={name} column id='sendToAllUsersDiv'>
                                                                 <Component {...props} />
-                                                                <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide"}>
+                                                                <div className={this.state.selectedRadioBtn === "allUsers" ? "" : "hide contentInfoClass"}>
                                                                     <div className="noteText">
                                                                         <Text error content={this.localize("SendToAllUsersNote")} />
                                                                     </div>
@@ -606,9 +655,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                     label: this.localize("SendToGroups"),
                                                     children: (Component, { name, ...props }) => {
                                                         return (
-                                                            <Flex key={name} column>
+                                                            <Flex key={name} column id='sendToGroupsDiv'>
                                                                 <Component {...props} />
-                                                                <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide"}>
+                                                                <div className={this.state.groupsOptionSelected && !this.state.groupAccess ? "" : "hide contentInfoClass"}>
                                                                     <div className="noteText">
                                                                         <Text error content={this.localize("SendToGroupsPermissionNote")} />
                                                                     </div>
@@ -628,7 +677,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                                     noResultsMessage={this.state.noResultMessage}
                                                                     unstable_pinned={this.state.unstablePinned}
                                                                 />
-                                                                <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide"}>
+                                                                <div className={this.state.groupsOptionSelected && this.state.groupAccess ? "" : "hide contentInfoClass"}>
                                                                     <div className="noteText">
                                                                         <Text error content={this.localize("SendToGroupsNote")} />
                                                                     </div>
@@ -651,12 +700,13 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                             <Flex className="footerContainer" vAlign="end" hAlign="end">
                                 <Flex className="buttonContainer" gap="gap.small">
                                     <Flex.Item push>
-                                        <Loader id="draftingLoader" className="hiddenLoader draftingLoader" size="smallest" label={this.localize("DraftingMessageLabel")} labelPosition="end" />
+                                        <Loader id="draftingLoader" className="hiddenLoader draftingLoader" size="smallest" label={this.localize("DraftingMessageLabel")} labelPosition="end">
+                                        </Loader>
                                     </Flex.Item>
                                     <Flex.Item push>
                                         <Button content={this.localize("Back")} onClick={this.onBack} secondary />
                                     </Flex.Item>
-                                    <Button content={this.localize("SaveAsDraft")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
+                                    <Button content={this.localize("SaveAsDraft")} aria-label={this.localize("DraftingMessageLabel")} disabled={this.isSaveBtnDisabled()} id="saveBtn" onClick={this.onSave} primary />
                                 </Flex>
                             </Flex>
                         </Flex>
@@ -839,7 +889,7 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
         let spanner = document.getElementsByClassName("draftingLoader");
         spanner[0].classList.remove("hiddenLoader");
-
+        
         if (this.state.exists) {
             this.editDraftMessage(draftMessage).then(() => {
                 microsoftTeams.tasks.submitTask();
