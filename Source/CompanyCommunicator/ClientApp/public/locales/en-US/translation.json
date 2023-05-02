@@ -94,5 +94,6 @@
   "ErrorURLMessage": "URL must start with https://",
   "ErrorImageTypesMessage": "Supported file types are .jpg, .jpeg, .png, .gif",
   "ErrorImageSizeMessage": "Maximum allowed size of image via upload is ~1 MB.",
-  "ImageSizeInfoContent": "Maximum allowed size of image via upload is ~1 MB. It's recommended to use image upload functionality for smaller size images."
+  "ImageSizeInfoContent": "Maximum allowed size of image via upload is ~1 MB. It's recommended to use image upload functionality for smaller size images.",
+  "UploadImageInfo": "Upload image, image type should be jpeg, jpg, png or gif."
 }
