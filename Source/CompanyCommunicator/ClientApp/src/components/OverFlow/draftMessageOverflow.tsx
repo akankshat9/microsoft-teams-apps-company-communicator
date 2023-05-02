@@ -56,6 +56,14 @@ class Overflow extends React.Component<OverflowProps, OverflowState> {
         });
     }
 
+    public componentDidUpdate() {
+        // Set tab focus on more icon
+        const moreIconDraftElement = document.getElementsByClassName("menuContainer");
+        for (let i = 0; i < moreIconDraftElement.length; i++) {
+            moreIconDraftElement[i].setAttribute("tabindex","0");
+        }
+    }
+
     public render(): JSX.Element {
         const items = [
             {
