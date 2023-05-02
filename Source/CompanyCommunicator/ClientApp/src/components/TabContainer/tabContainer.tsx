@@ -33,6 +33,7 @@ export interface ITabContainerState {
 
 class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
     readonly localize: TFunction;
+    private newButtonRef: any;
     constructor(props: ITaskInfoProps) {
         super(props);
         this.localize = this.props.t;
@@ -40,6 +41,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
             url: getBaseUrl() + "/newmessage?locale={locale}"
         }
         this.escFunction = this.escFunction.bind(this);
+        this.newButtonRef = React.createRef();
     }
 
     public componentDidMount() {
@@ -136,7 +138,7 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
                 </div>
                 <Flex className="tabContainer" column fill gap="gap.small">
                     <Flex className="newPostBtn" hAlign="end" vAlign="end">
-                        <Button content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
+                        <Button id="newButtonElement" ref={this.newButtonRef} content={this.localize("NewMessage")} onClick={this.onNewMessage} primary />
                     </Flex>
                     <Flex className="messageContainer">
                         <Flex.Item grow={1} >
@@ -159,7 +161,8 @@ class TabContainer extends React.Component<ITaskInfoProps, ITabContainerState> {
 
         let submitHandler = (err: any, result: any) => {
             this.props.getDraftMessagesList();
-        };
+            this.newButtonRef.current.focus();
+            };
 
         microsoftTeams.tasks.startTask(taskInfo, submitHandler);
     }
