@@ -3,7 +3,9 @@
     .newPostBtn {
         margin: 0.5rem 0rem;
     }
-
+    #newButtonElement:focus {
+        outline: 1px solid #000;
+      }
     .messageContainer {
 
         .ui-accordion__title {
