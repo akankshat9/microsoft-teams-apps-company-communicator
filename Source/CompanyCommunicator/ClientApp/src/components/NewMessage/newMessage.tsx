@@ -182,12 +182,6 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
 
     public componentDidUpdate(prevProps: Readonly<INewMessageProps>, prevState: Readonly<formState>) {
         
-        // Set image url tooltip focus
-        const imageUrlElement = document.getElementsByClassName("imgUrlTooltip");
-        for (let i = 0; i < imageUrlElement.length; i++) {
-            imageUrlElement[i].setAttribute("tabindex", "0");
-        }
-        
         // Set aria-label attribute to 'send to everyone' radio button elements
         let sendToAllUsersElement = document.getElementById("sendToAllUsersDiv");
         if (!this.state.selectedAllUsersElement && sendToAllUsersElement) {
@@ -488,9 +482,9 @@ class NewMessage extends React.Component<INewMessageProps, formState> {
                                                         <TooltipHost
                                                             content={this.localize("ImageSizeInfoContent")}
                                                             calloutProps={{ gapSpace: 0 }}
-                                                            hostClassName="tooltipHostStyles imgUrlTooltip"
+                                                            hostClassName="tooltipHostStyles"
                                                         >
-                                                            <Icon aria-label="Info" iconName="Info" className='tooltipHostStylesInsideContent' />
+                                                            <Icon aria-label="Info" tabIndex={0} iconName="Info" className='tooltipHostStylesInsideContent' />
                                                         </TooltipHost>
                                                     </>
                                                 }
