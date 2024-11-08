@@ -7,7 +7,7 @@ import * as AdaptiveCards from 'adaptivecards';
 import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import validator from 'validator';
+import { isURL } from 'validator';
 import {
   Button,
   Combobox,
@@ -598,7 +598,7 @@ export const NewMessage = () => {
 
   const onBtnLinkChanged = (event: any) => {
     if (
-      validator.isURL(event.target.value, { require_protocol: true, protocols: ['https'] }) ||
+      isURL(event.target.value, { require_protocol: true, protocols: ['https'] }) ||
       event.target.value === ''
     ) {
       setBtnLinkErrorMessage('');
@@ -772,6 +772,7 @@ export const NewMessage = () => {
                     value={imageFileName || ''}
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     placeholder={t('PlaceHolderImageURL')!}
+                    aria-placeholder={t('PlaceHolderImageURL') ?? ''}
                     onChange={onImageLinkChanged}
                   />
                   <div
@@ -819,6 +820,7 @@ export const NewMessage = () => {
                   appearance='filled-darker'
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   placeholder={t('PlaceHolderSummary')!}
+                  aria-placeholder={t('PlaceHolderSummary') ?? ''}
                   value={messageState.summary ?? ''}
                   onChange={onSummaryChanged}
                 />
@@ -827,6 +829,7 @@ export const NewMessage = () => {
                 <Input
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   placeholder={t('PlaceHolderAuthor')!}
+                  aria-placeholder={t('PlaceHolderAuthor') ?? ''}
                   size='large'
                   onChange={onAuthorChanged}
                   autoComplete='off'
@@ -839,6 +842,7 @@ export const NewMessage = () => {
                   size='large'
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   placeholder={t('PlaceHolderButtonTitle')!}
+                  aria-placeholder={t('PlaceHolderButtonTitle') ?? ''}
                   onChange={onBtnTitleChanged}
                   autoComplete='off'
                   appearance='filled-darker'
@@ -855,6 +859,7 @@ export const NewMessage = () => {
                   size='large'
                   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                   placeholder={t('PlaceHolderButtonURL')!}
+                  aria-placeholder={t('PlaceHolderButtonURL') ?? ''}
                   onChange={onBtnLinkChanged}
                   type='url'
                   autoComplete='off'
